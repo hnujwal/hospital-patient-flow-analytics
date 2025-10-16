@@ -6,9 +6,9 @@ from datetime import datetime, timedelta
 from kafka import KafkaProducer
 
 #Eventhub Configuration
-EVENTHUBS_NAMESPACE = "hospital-analytics-name-space.servicebus.windows.net"
-EVENT_HUB_NAME="hospital-analytics"  
-CONNECTION_STRING = "Endpoint=sb://hospital-analytics-name-space.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=C13FqbLCYaCQXopcmVa2+zxgkN3FM5yXH+AEhF/nh+0="
+EVENTHUBS_NAMESPACE = ""
+EVENT_HUB_NAME=""  
+CONNECTION_STRING = ""
 
 producer = KafkaProducer(
     bootstrap_servers=[f"{EVENTHUBS_NAMESPACE}:9093"],
