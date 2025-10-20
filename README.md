@@ -15,8 +15,8 @@ A data analytics solution to optimize and analyze patient flow in healthcare fac
 ## Technology Stack
 
 - Python
-- Pandas for data analysis
-- Matplotlib/Seaborn for visualization
+- Kafka for data analysis
+- power-Bi for visualization
 - SQL for database management
 
 ## Installation
