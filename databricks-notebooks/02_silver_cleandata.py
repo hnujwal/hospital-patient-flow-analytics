@@ -1,34 +1,40 @@
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
-#ADLS configuration
-spark.conf.set("fs.azure.account.key.hospitalsstorage.dfs.core.windows.net",
-dbutils.secrets.get(scope="hospitalanalyticsvaultscope"
-,key="storage-connection"))
-bronze_path="abfss://bronze@hospitalsstorage.dfs.core.windows.net/patient_flow"
-silver_path="abfss://silver@hospitalsstorage.dfs.core.windows.net/patient_flow"
+
+#ADLS configuration 
+spark.conf.set(
+  "fs.azure.account.key.<<Storageaccount_name>>.dfs.core.windows.net",
+  "<<Storage_Account_access_key>>"
+)
+
+bronze_path = "abfss://<<container>>@<<Storageaccount_name>>.core.windows.net/<<path>>"
+silver_path = "abfss://<<container>>@<<Storageaccount_name>>.core.windows.net/<<path>>"
 
 #read from bronze
-bronze_df=(
+bronze_df = (
     spark.readStream
     .format("delta")
     .load(bronze_path)
 )
-#Define schema for silver table
-schema=StructType([
-    StructField("patient_id",StringType()),
-    StructField("gender",StringType()),
-    StructField("age",IntegerType()),
-    StructField("department",StringType()),
-    StructField("admission_time",StringType()),
-    StructField("discharge_time",StringType()),
-    StructField("bed_id",IntegerType()),
-    StructField("hospital_id",IntegerType())
-    ])
-#parce it to dataframe
+
+#Defin Schema
+schema = StructType([
+    StructField("patient_id", StringType()),
+    StructField("gender", StringType()),
+    StructField("age", IntegerType()),
+    StructField("department", StringType()),
+    StructField("admission_time", StringType()),
+    StructField("discharge_time", StringType()),
+    StructField("bed_id", IntegerType()),
+    StructField("hospital_id", IntegerType())
+])
+
+#Parse it to dataframe
 parsed_df = bronze_df.withColumn("data",from_json(col("raw_json"),schema)).select("data.*")
-#conver type to timestamp
-clean_df=parsed_df.withColumn("admission_time",to_timestamp("admission_time"))
-clean_df=clean_df.withColumn("discharge_time",to_timestamp("discharge_time"))
+
+#convert type to Timestamp
+clean_df = parsed_df.withColumn("admission_time", to_timestamp("admission_time"))
+clean_df = clean_df.withColumn("discharge_time", to_timestamp("discharge_time"))
 
 #invalid admission_times
 clean_df = clean_df.withColumn("admission_time",

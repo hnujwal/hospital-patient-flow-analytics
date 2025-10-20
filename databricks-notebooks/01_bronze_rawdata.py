@@ -1,9 +1,10 @@
 from pyspark.sql.functions import *
+
 # Azure Event Hub Configuration
-event_hub_namespace = "hospital-analytics-name-space.servicebus.windows.net"
-event_hub_name="hospital-analytics"  
-event_hub_conn_str = dbutils.secrets.get(scope="hospitalanalyticsvaultscope"
-,key="eventhub-connection")
+event_hub_namespace = "<<Namespace_hostname>>"
+event_hub_name="<<Eventhub_Name>>"  
+event_hub_conn_str = "<<Connection_string>>"
+
 
 kafka_options = {
     'kafka.bootstrap.servers': f"{event_hub_namespace}:9093",
@@ -15,18 +16,27 @@ kafka_options = {
     'failOnDataLoss': 'false'
 }
 #Read from eventhub
-raw_df=(spark.readStream.format("kafka").options(**kafka_options).load())
-#Cast data to json
-json_df=raw_df.selectExpr("CAST(value AS STRING) as raw_json")
+raw_df = (spark.readStream
+          .format("kafka")
+          .options(**kafka_options)
+          .load()
+          )
 
-#ADLS configuration
-spark.conf.set("fs.azure.account.key.hospitalsstorage.dfs.core.windows.net",
-dbutils.secrets.get(scope="hospitalanalyticsvaultscope"
-,key="storage-connection"))
-bronze_path="abfss://bronze@hospitalsstorage.dfs.core.windows.net/patient_flow"
-#Write strem to bronze
+#Cast data to json
+json_df = raw_df.selectExpr("CAST(value AS STRING) as raw_json")
+
+#ADLS configuration 
+spark.conf.set(
+  "fs.azure.account.key.<<Storageaccount_name>>.dfs.core.windows.net",
+  "<<Storage_Account_access_key>>"
+)
+
+bronze_path = "abfss://<<container>>@<<Storageaccount_name>>.core.windows.net/<<path>>"
+
+#Write stream to bronze
 (
-    json_df.writeStream
+    json_df
+    .writeStream
     .format("delta")
     .outputMode("append")
     .option("checkpointLocation", "dbfs:/mnt/bronze/_checkpoints/patient_flow")

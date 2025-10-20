@@ -3,17 +3,18 @@ from pyspark.sql.functions import lit, col, expr, current_timestamp, to_timestam
 from delta.tables import DeltaTable
 from pyspark.sql import Window
 
-#ADLS configuration
-spark.conf.set("fs.azure.account.key.hospitalsstorage.dfs.core.windows.net",
-dbutils.secrets.get(scope="hospitalanalyticsvaultscope"
-,key="storage-connection"))
+#ADLS configuration 
+spark.conf.set(
+  "fs.azure.account.key.<<Storageaccount_name>>.dfs.core.windows.net",
+  "<<Storage_Account_access_key>>"
+)
 
 
 # Paths
-silver_path = "abfss://silver@hospitalsstorage.dfs.core.windows.net/patient_flow"
-gold_dim_patient = "abfss://gold@hospitalsstorage.dfs.core.windows.net/dim_patient"
-gold_dim_department = "abfss://gold@hospitalsstorage.dfs.core.windows.net/dim_department"
-gold_fact = "abfss://gold@hospitalsstorage.dfs.core.windows.net/fact_patient_flow"
+silver_path = "abfss://<<container>>@<<Storageaccount_name>>.core.windows.net/<<path>>"
+gold_dim_patient = "abfss://<<container>>@<<Storageaccount_name>>.core.windows.net/<<path>>"
+gold_dim_department = "abfss://<<container>>@<<Storageaccount_name>>.core.windows.net/<<path>>"
+gold_fact = "abfss://<<container>>@<<Storageaccount_name>>.core.windows.net/<<path>>"
 
 # Read silver data (assume append-only)
 silver_df = spark.read.format("delta").load(silver_path)
